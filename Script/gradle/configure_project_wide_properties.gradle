@@ -1,0 +1,107 @@
+// This block encapsulates custom properties and makes them available to all
+// modules in the project.
+ext.android = [
+        compileSdkVersion: 25,
+        buildToolsVersion: "25.0.3"
+]
+
+ext.dependenciesVersion = [
+        supportLibVersion               : '25.2.0',
+        multidexVersion                 : '1.0.1',
+
+        //注意 dataBinding 的两个库版本号有对应关系, 不然 android studio 代码提示不正确
+        dataBindingBaseLibVersion       : '2.2.3', //https://bintray.com/android/android-tools/com.android.databinding.baseLibrary
+        dataBindingLibVersion           : '1.2.1',
+
+        gsonVersion                     : '2.8.0',
+        autoValueVersion                : '+',
+        autoValueGsonVersion            : '+',
+        autoValueParcelVersion          : '+',
+        autoValueCursorVersion          : '+',
+        rxAndroidVersion                : '2.0.1',
+        rxlifecycleVersion              : '2.0.1',
+        okhttpVersion                   : '3.6.0',
+        retrofitVersion                 : '2.2.0',
+        retrofitFastjsonConverterVersion: '2.1.0',
+        buglySdkVersion                 : '2.4.0',
+        buglyNdkVersion                 : '3.1.2',
+        glideVersion                    : '3.7.0',
+        rxbindingVersion                : '2.0.0',
+        processPhoenixVersion           : '2.0.0',
+        marsXlogVersion                 : '1.0.2',
+        blockcanaryVersion              : '1.5.0',
+        leakcanaryVersion               : '1.5',
+        quickDemoCreatorVersion         : '+'
+]
+
+ext.modelDependencies = [
+        TECENT_IM_SDK: ':TECENT_IM_SDK',
+        SQLCIPHER    : ':SQLCIPHER'
+]
+
+ext.dependencies = [
+        /* Moudle : COMMON */
+        "com_android_support_annotations"                 : "com.android.support:support-annotations:${dependenciesVersion.supportLibVersion}",
+        // google
+        "com_google_code_gson"                            : "com.google.code.gson:gson:${dependenciesVersion.gsonVersion}",
+        "com_google_auto_value"                           : "com.google.auto.value:auto-value:${dependenciesVersion.autoValueVersion}",
+        "com_ryanharter_auto_value_gson"                  : "com.ryanharter.auto.value:auto-value-gson:${dependenciesVersion.autoValueGsonVersion}",
+        "com_ryanharter_auto_value_parcel"                : "com.ryanharter.auto.value:auto-value-parcel:${dependenciesVersion.autoValueParcelVersion}",
+        "com_ryanharter_auto_value_parcel_adapter"        : "com.ryanharter.auto.value:auto-value-parcel-adapter:${dependenciesVersion.autoValueParcelVersion}",
+        "com_gabrielittner_auto_value_cursor"             : "com.gabrielittner.auto.value:auto-value-cursor:${dependenciesVersion.autoValueCursorVersion}",
+        "com_gabrielittner_auto_value_cursor_annotations" : "com.gabrielittner.auto.value:auto-value-cursor-annotations:${dependenciesVersion.autoValueCursorVersion}",
+        // RX
+        "io_reactivex_rxjava2_rxjava"                     : "io.reactivex.rxjava2:rxjava:${dependenciesVersion.rxAndroidVersion}",
+        "io_reactivex_rxjava2_rxandroid"                  : "io.reactivex.rxjava2:rxandroid:${dependenciesVersion.rxAndroidVersion}",
+        // 网络方面的第三方依赖库
+        "com_squareup_okhttp3_okhttp"                     : "com.squareup.okhttp3:okhttp:${dependenciesVersion.okhttpVersion}",
+        "com_squareup_okhttp3_mockwebserver"              : "com.squareup.okhttp3:mockwebserver:${dependenciesVersion.okhttpVersion}",
+        "com_squareup_retrofit2_retrofit"                 : "com.squareup.retrofit2:retrofit:${dependenciesVersion.retrofitVersion}",
+        "com_squareup_retrofit2_adapter_rxjava2"          : "com.squareup.retrofit2:adapter-rxjava2:${dependenciesVersion.retrofitVersion}",
+        "com_squareup_retrofit2_converter_gson"           : "com.squareup.retrofit2:converter-gson:${dependenciesVersion.retrofitVersion}",
+        "org_ligboy_retrofit2_converter_fastjson_android" : "org.ligboy.retrofit2:converter-fastjson-android:${dependenciesVersion.retrofitFastjsonConverterVersion}",
+        // 异常上报和运营统计
+        "com_tencent_bugly_crashreport"                   : "com.tencent.bugly:crashreport:${dependenciesVersion.buglySdkVersion}",
+        "com_tencent_bugly_nativecrashreport"             : "com.tencent.bugly:nativecrashreport:${dependenciesVersion.buglyNdkVersion}",
+        // 日志
+        "com_tencent_mars_xlog"                           : "com.tencent.mars:mars-xlog:${dependenciesVersion.marsXlogVersion}",
+        // 卡顿监测器
+        "com_github_markzhai_blockcanary_android"         : "com.github.markzhai:blockcanary-android:${dependenciesVersion.blockcanaryVersion}",
+        "com_github_markzhai_blockcanary_no_op"           : "com.github.markzhai:blockcanary-no-op:${dependenciesVersion.blockcanaryVersion}",
+        // 内存泄露监测器
+        "com_squareup_leakcanary_leakcanary_android"      : "com.squareup.leakcanary:leakcanary-android:${dependenciesVersion.leakcanaryVersion}",
+        "com_squareup_leakcanary_leakcanary_android_no_op": "com.squareup.leakcanary:leakcanary-android-no-op:${dependenciesVersion.leakcanaryVersion}",
+
+        /* Moudle : COMMON_UI */
+        "com_android_support_appcompat_v7"                : "com.android.support:appcompat-v7:${dependenciesVersion.supportLibVersion}",
+        "com_android_support_recyclerview_v7"             : "com.android.support:recyclerview-v7:${dependenciesVersion.supportLibVersion}",
+        "com_android_support_cardview_v7"                 : "com.android.support:cardview-v7:${dependenciesVersion.supportLibVersion}",
+        "com_android_support_design"                      : "com.android.support:design:${dependenciesVersion.supportLibVersion}",
+        "com_android_databinding_baseLibrary"             : "com.android.databinding:baseLibrary:${dependenciesVersion.dataBindingBaseLibVersion}",
+        "com_android_databinding_library"                 : "com.android.databinding:library:${dependenciesVersion.dataBindingLibVersion}",
+        // UI方面的第三方依赖库
+        "com_github_bumptech_glide"                       : "com.github.bumptech.glide:glide:${dependenciesVersion.glideVersion}",
+        "com_jakewharton_rxbinding2_rxbinding"            : "com.jakewharton.rxbinding2:rxbinding:${dependenciesVersion.rxbindingVersion}",
+        "com_trello_rxlifecycle2"                         : "com.trello.rxlifecycle2:rxlifecycle:${dependenciesVersion.rxlifecycleVersion}",
+        "com_trello_rxlifecycle2_android"                 : "com.trello.rxlifecycle2:rxlifecycle-android:${dependenciesVersion.rxlifecycleVersion}",
+        "com_trello_rxlifecycle2_components"              : "com.trello.rxlifecycle2:rxlifecycle-components:${dependenciesVersion.rxlifecycleVersion}",
+        "com_trello_rxlifecycle2_navi"                    : "com.trello.rxlifecycle2:rxlifecycle-navi:${dependenciesVersion.rxlifecycleVersion}",
+
+        /* Moudle : app*/
+        "com_android_support_multidex"                    : "com.android.support:multidex:${dependenciesVersion.multidexVersion}",
+        "com_jakewharton_process_phoenix"                 : "com.jakewharton:process-phoenix:${dependenciesVersion.processPhoenixVersion}",
+        "dev_xesam_android_quick_demo_creator"            : "dev.xesam.android:quick-demo-creator:${dependenciesVersion.quickDemoCreatorVersion}"
+]
+
+ext.android_defaultConfig = [
+        applicationId   : "com.example.myproduct.app",
+        minSdkVersion   : 16,
+        targetSdkVersion: 25,
+        versionCode     : 10203,
+        versionName     : "V1.2.3"
+]
+
+// 全局配置所有 Module 的 release 版本是否要混淆
+ext.android_buildTypes_release = [
+        minifyEnabled: false
+]

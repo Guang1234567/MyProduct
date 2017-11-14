@@ -1,0 +1,8 @@
+<resources>
+
+    <!--https://xesam.github.io/android/2016/09/30/Android-Splash%E5%AE%9E%E8%B7%B5.html-->
+    <style name="AppTheme.Splash" parent="AppTheme.Splash.Base">
+        <item name="android:windowDrawsSystemBarBackgrounds">false</item>
+    </style>
+
+</resources>

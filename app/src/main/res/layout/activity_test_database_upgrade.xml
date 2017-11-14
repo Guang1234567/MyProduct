@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View"/>
+
+        <import type="android.widget.Button"/>
+
+        <import type="android.graphics.Color"/>
+
+        <variable
+            name="activity"
+            type="com.example.myproduct.app.demo.db.TestDatabaseUpgradeDemoActivity"/>
+    </data>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/tool_bar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:logo="@mipmap/ic_launcher"
+            app:subtitle="Sub Title"
+            app:title="@{activity.mToolbarTitle}"
+            app:navigationIcon="@mipmap/ic_launcher"/>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/tool_bar"/>
+
+    </RelativeLayout>
+</layout>

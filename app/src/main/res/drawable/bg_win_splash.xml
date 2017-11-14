@@ -1,0 +1,26 @@
+<layer-list
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:opacity="opaque">
+
+    <!--背景-->
+    <item>
+        <bitmap
+            android:src="@drawable/ic_splash_diamond_upholstery"
+            android:tileMode="repeat"/>
+    </item>
+
+    <!--产品图标-->
+    <item android:bottom="64dp">
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/ic_splash_product_logo"/>
+    </item>
+
+    <!--产品所属公司 Logo-->
+    <item android:bottom="16dp">
+        <bitmap
+            android:gravity="bottom|center_horizontal"
+            android:src="@drawable/ic_splash_company_logo"/>
+    </item>
+
+</layer-list>

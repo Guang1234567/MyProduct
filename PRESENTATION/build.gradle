@@ -1,0 +1,92 @@
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+
+apply plugin: 'com.android.library'
+
+// 构建时间相关信息
+long buildTimeInMillis = System.currentTimeMillis()
+DateFormat df = new SimpleDateFormat("yyyyMMdd");
+df.setTimeZone(TimeZone.getTimeZone("UTC+8"))
+def buildTimeFormatted = df.format(new Date(buildTimeInMillis));
+
+android {
+    compileSdkVersion rootProject.ext.android.compileSdkVersion
+    buildToolsVersion rootProject.ext.android.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.android_defaultConfig.minSdkVersion
+        targetSdkVersion rootProject.ext.android_defaultConfig.targetSdkVersion
+        versionCode rootProject.ext.android_defaultConfig.versionCode
+        versionName rootProject.ext.android_defaultConfig.versionName
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled rootProject.ext.android_buildTypes_release.minifyEnabled
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            buildConfigField("Long", "BUILD_TIME_IN_MILLIS", "${buildTimeInMillis}L")
+            buildConfigField "String", "BUILD_TIME", "\"${buildTimeFormatted}\""
+        }
+        debug {
+            jniDebuggable true
+
+            buildConfigField("Long", "BUILD_TIME_IN_MILLIS", "${buildTimeInMillis}L")
+            buildConfigField "String", "BUILD_TIME", "\"${buildTimeFormatted}\""
+        }
+    }
+
+    productFlavors {
+        dev {
+            buildConfigField("Boolean", "IS_DEV_MODE", "true")
+        }
+        prod {
+            buildConfigField("Boolean", "IS_DEV_MODE", "false")
+        }
+    }
+
+    // 过滤某些"构建变体(variant) = flavors + buildType"
+    variantFilter { variant ->
+        def flavorNames = variant.flavors*.name
+        def buildTypeName = variant.buildType.name
+        // To check for a build type instead, use variant.buildType.name == "buildType"
+        if ((flavorNames.contains("dev") && buildTypeName == "release")
+                || (flavorNames.contains("prod") && buildTypeName == "debug")) {
+            // Gradle ignores any variants that satisfy the conditions above.
+            setIgnore(true)
+        }
+    }
+
+    // If the library configures product flavors, you must specify
+    // a build variant by its full configuration name. The following
+    // sets the "demoDebug" build variant as the default version
+    // of the library that Gradle should publish.
+    defaultPublishConfig "devDebug"
+    // Note that this might increase build times because Gradle must
+    // build multiple AARs, instead of only one.
+    publishNonDefault true
+}
+
+// Creates Gradle dependency configurations to use in the dependencies block.
+configurations {
+    // Initializes placeholders for the demoDebugCompile and fullReleaseCompile
+    // dependency configurations.
+    devDebugCompile {}
+    prodReleaseCompile {}
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    testCompile 'junit:junit:4.12'
+
+    // If the library configures multiple build variants using product flavors,
+    // you must target one of the library's variants using its full configuration name.
+    devDebugCompile project(path: ':SDK', configuration: 'devDebug')
+    prodReleaseCompile project(path: ':SDK', configuration: 'prodRelease')
+
+    def rootExtDp = rootProject.ext.dependencies
+}

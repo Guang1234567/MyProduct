@@ -1,0 +1,6 @@
+include ':app', ':UISDK', ':SDK', ':COMMON', ':COMMON_UI', ':TECENT_IM_SDK', ':PRESENTATION', ':SQLCIPHER'
+
+
+project(':TECENT_IM_SDK').projectDir = new File('LIB_THIRD_PARTY/TECENT_IM_SDK')
+project(':SQLCIPHER').projectDir = new File('LIB_THIRD_PARTY/android-database-sqlcipher')
+

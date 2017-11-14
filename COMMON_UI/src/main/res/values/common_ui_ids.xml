@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--界面 相关-->
+    <item type="id" name="common_ui_tag_id_view_holder" />
+
+    <item type="id" name="common_ui_tag_id_view_name"/>
+
+    <item type="id" name="common_ui_tag_id_glide"/>
+
+</resources>

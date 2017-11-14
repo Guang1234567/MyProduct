@@ -1,0 +1,264 @@
+apply plugin: 'com.android.application'
+apply plugin: 'bugly'
+apply plugin: 'com.jakewharton.hugo'
+
+
+def buildTime = new Date()
+
+def hostName() {
+    return System.getProperty("user.name") + "@" + InetAddress.localHost.hostName
+}
+
+def String revisionOfGit() {
+    /*def code = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'rev-parse', '--short', 'HEAD'
+        standardOutput = code
+    }
+    return code.toString()*/
+
+    return 'ABCDEFG'
+}
+
+//加载资源
+Properties localProperties = new Properties()
+InputStream inputStream = project.rootProject.file('local.properties').newDataInputStream() ;
+localProperties.load(inputStream)
+
+android {
+    signingConfigs {
+        release {
+            keyAlias localProperties.getProperty('RELEASE_KEY_ALIAS')
+            keyPassword localProperties.getProperty('RELEASE_KEY_PASSWORD')
+            storeFile file(localProperties.getProperty('RELEASE_STORE_FILE'))
+            storePassword localProperties.getProperty('RELEASE_STORE_PASSWORD')
+
+            //storePassword System.console().readLine("\nKeystore password: ")
+            //keyPassword System.console().readLine("\nKey password: ")
+        }
+    }
+    compileSdkVersion rootProject.ext.android.compileSdkVersion
+    buildToolsVersion rootProject.ext.android.buildToolsVersion
+    defaultConfig {
+        applicationId rootProject.ext.android_defaultConfig.applicationId
+        minSdkVersion rootProject.ext.android_defaultConfig.minSdkVersion
+        targetSdkVersion rootProject.ext.android_defaultConfig.targetSdkVersion
+        versionCode rootProject.ext.android_defaultConfig.versionCode
+        versionName rootProject.ext.android_defaultConfig.versionName
+        versionNameSuffix "-${revisionOfGit()}-${buildTime.format("yyyy_MM_dd_HH_mm_ss")}"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            // 设置支持的SO库架构
+            abiFilters 'armeabi' //, 'x86', 'armeabi-v7a', 'x86_64', 'arm64-v8a'
+        }
+
+        multiDexEnabled true //dex 分包
+
+        //一些额外的编译信息
+        buildConfigField("Long", "BUILD_TIME", "${buildTime.getTime()}L")
+        buildConfigField "String", "BUILD_TIME_READABLE", "\"${buildTime.format("yyyy_MM_dd_HH_mm_ss")}\""
+        buildConfigField "String", "BUILD_REVISION_GIT", "\"${revisionOfGit()}\""
+        buildConfigField "String", "BUILD_HOST", "\"${hostName()}\""
+    }
+    buildTypes {
+        release {
+            debuggable true
+            jniDebuggable true
+
+            minifyEnabled rootProject.ext.android_buildTypes_release.minifyEnabled
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+        debug {
+            //applicationIdSuffix ".debug"
+            jniDebuggable true
+        }
+    }
+
+    // Specifies the flavor dimensions you want to use. The order in which you
+    // list each dimension determines its priority, from highest to lowest,
+    // when Gradle merges variant sources and configurations. You must assign
+    // each product flavor you configure to one of the flavor dimensions.
+
+    flavorDimensions "STAGE", "MODE"
+
+    productFlavors {
+        dev {
+            dimension "STAGE"
+            //applicationIdSuffix '.dev'
+            versionNameSuffix "-dev"
+
+            minSdkVersion 21 // 加快编译速度
+
+            buildConfigField("Boolean", "IS_DEV_MODE", "true")
+        }
+        prod {
+            dimension "STAGE"
+            //applicationIdSuffix '.prod'
+            versionNameSuffix "-prod"
+
+            buildConfigField("Boolean", "IS_DEV_MODE", "false")
+        }
+        demo {
+            dimension "MODE"
+            applicationIdSuffix ".demo"
+            versionNameSuffix "-demo"
+        }
+        // 云平台免费版
+        free {
+            dimension "MODE"
+            applicationIdSuffix ".free"
+            versionNameSuffix "-free"
+        }
+        // 云平台付费版
+        paid {
+            dimension "MODE"
+            //applicationIdSuffix ".paid"
+            versionNameSuffix "-paid"
+        }
+        // 京东定制付费版
+        paidJD {
+            dimension "MODE"
+            applicationIdSuffix ".paidJD"
+            versionNameSuffix "-paidJD"
+            applicationId "com.jd.myproduct.app" // jd 要求改名字
+        }
+        // 支付宝定制付费版
+        paidAlipay {
+            dimension "MODE"
+            applicationIdSuffix ".paidAlipay"
+            versionNameSuffix "-paidAlipay"
+            applicationId "com.alipay.myproduct.app" // alipay 要求改名字
+        }
+    }
+
+    // 过滤某些"构建变体(variant) = flavors + buildType"
+    variantFilter { variant ->
+        def flavorNames = variant.flavors*.name
+        def buildTypeName = variant.buildType.name
+        // To check for a build type instead, use variant.buildType.name == "buildType"
+        if ((flavorNames.contains("dev") && buildTypeName == "release")
+                || (flavorNames.contains("prod") && buildTypeName == "debug")
+                || flavorNames.contains("demo")) {
+            // Gradle ignores any variants that satisfy the conditions above.
+            setIgnore(true)
+        }
+    }
+
+    applicationVariants.all { variant ->
+        // 更改 apk 名字
+        variant.outputs.each { output ->
+            def outputFile = output.outputFile
+            if (outputFile.getName().endsWith(".apk")) {
+                output.outputFile = new File(outputFile.parent, outputFile.name.replace(".apk", "-${variant.mergedFlavor.versionName}.apk"))
+                buildConfigField("String", "APP_BUILD_INFO", "\"${output.outputFile.name}\"")
+            }
+        }
+
+        // 为不同构建变体分配 bugly 账号
+        def buglyAppId = null;
+        def buglyAppKey = null;
+        if (variant.name.equals("devPaidDebug")) {
+            buglyAppId = 'c10b789d28'
+            buglyAppKey = '6d98b2d8-2c69-4052-bbac-46fd4f639ba0'
+
+            buildConfigField("String", "BUGLY_APP_ID", "\"c10b789d28\"")
+            buildConfigField("String", "EXTERNAL_DATA_DIR", "\"MY_PRODUCT_APP_DEV_PAID\"")
+        } else if (variant.name.equals("prodPaidRelease")) {
+            buglyAppId = 'd5e6bd951a'
+            buglyAppKey = 'd1c700d6-a2e3-4a04-bb34-b5cda8f0d0f7'
+
+            buildConfigField("String", "BUGLY_APP_ID", "\"d5e6bd951a\"")
+            buildConfigField("String", "EXTERNAL_DATA_DIR", "\"MY_PRODUCT_APP_PROD_PAID\"")
+        }
+        if (buglyAppId != null) {
+            variant.ext.buglyAppId = buglyAppId
+        }
+        if (buglyAppKey != null) {
+            variant.ext.buglyAppKey = buglyAppKey
+        }
+
+        println """\
+        \n
+        "★★★★★★★★★★★★★★★ Variants 信息: ★★★★★★★★★★★★★★★★★"
+                    variant.flavorName: $variant.flavorName
+                    variant.buildType.name: $variant.buildType.name
+                    variant.name: $variant.name
+                    variant.versionCode: $variant.versionCode
+                    variant.versionName: $variant.versionName
+        "★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★"
+        \n
+        """
+    }
+
+    dexOptions {
+        jumboMode true
+        preDexLibraries true
+        maxProcessCount 8
+        javaMaxHeapSize "2048m"
+    }
+
+    // 使用 android data-binding support 库
+    // https://developer.android.com/topic/libraries/data-binding/index.html
+    // 先用 AndroidSdkManager 更新 <android_sdk_dir>\extras\android\m2repository\com\android\databinding
+    dataBinding {
+        enabled = true
+    }
+}
+
+// Creates Gradle dependency configurations to use in the dependencies block.
+configurations {
+    // Initializes placeholders for the demoDebugCompile and fullReleaseCompile
+    // dependency configurations.
+    devFreeDebugCompile {}
+    devPaidDebugCompile {}
+    devPaidJDDebugCompile {}
+    devPaidAlipayDebugCompile {}
+
+    prodFreeReleaseCompile {}
+    prodPaidReleaseCompile {}
+    prodPaidJDReleaseCompile {}
+    prodPaidAlipayReleaseCompile {}
+
+    all {
+        resolutionStrategy.force 'com.google.code.findbugs:jsr305:3.0.1'
+    }
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    //androidTestCompile 'com.google.code.findbugs:jsr305:3.0.1'
+    testCompile 'junit:junit:4.12'
+
+    // If the library configures multiple build variants using product flavors,
+    // you must target one of the library's variants using its full configuration name.
+    devFreeDebugCompile project(path: ':UISDK', configuration: 'devDebug')
+    devPaidDebugCompile project(path: ':UISDK', configuration: 'devDebug')
+    devPaidJDDebugCompile project(path: ':UISDK', configuration: 'devDebug')
+    devPaidAlipayDebugCompile project(path: ':UISDK', configuration: 'devDebug')
+
+    prodFreeReleaseCompile project(path: ':UISDK', configuration: 'prodRelease')
+    prodPaidReleaseCompile project(path: ':UISDK', configuration: 'prodRelease')
+    prodPaidJDReleaseCompile project(path: ':UISDK', configuration: 'prodRelease')
+    prodPaidAlipayReleaseCompile project(path: ':UISDK', configuration: 'prodRelease')
+
+    def rootExtDp = rootProject.ext.dependencies
+    compile rootExtDp.com_android_support_multidex
+    compile rootExtDp.com_jakewharton_process_phoenix
+    compile rootExtDp.dev_xesam_android_quick_demo_creator
+    // auto-value
+    annotationProcessor rootExtDp.com_google_auto_value
+    provided rootExtDp.com_google_auto_value
+    annotationProcessor rootExtDp.com_ryanharter_auto_value_gson
+    provided rootExtDp.com_ryanharter_auto_value_gson
+    annotationProcessor rootExtDp.com_ryanharter_auto_value_parcel
+    annotationProcessor rootExtDp.com_gabrielittner_auto_value_cursor
+
+
+    def rootExtMdp = rootProject.ext.modelDependencies
+}

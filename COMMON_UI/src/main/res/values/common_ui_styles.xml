@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="BottomBar.Base" parent="Widget.Design.TabLayout">
+        <item name="tabSelectedTextColor">?attr/colorPrimary</item> <!-- 从当前主题中查找主色调 -->
+        <item name="tabTextColor">@android:color/darker_gray</item>
+    </style>
+</resources>

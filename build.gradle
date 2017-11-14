@@ -1,0 +1,42 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+apply from: './Script/gradle/display_gradle_info.gradle'
+apply from: './Script/gradle/configure_project_wide_properties.gradle'
+
+apply plugin: "com.gradle.build-scan"
+
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.2.3'
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+        classpath "com.gradle:build-scan-plugin:1.6"
+        classpath 'org.tmatesoft.svnkit:svnkit:+'
+        classpath 'com.tencent.bugly:symtabfileuploader:+'
+        classpath 'com.jakewharton.hugo:hugo-plugin:1.2.1'
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+buildScan {
+    licenseAgreementUrl = 'https://gradle.com/terms-of-service'
+    licenseAgree = 'yes'
+}

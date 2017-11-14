@@ -1,0 +1,36 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion rootProject.ext.android.compileSdkVersion
+    buildToolsVersion rootProject.ext.android.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.android_defaultConfig.minSdkVersion
+        targetSdkVersion rootProject.ext.android_defaultConfig.targetSdkVersion
+        versionCode rootProject.ext.android_defaultConfig.versionCode
+        versionName rootProject.ext.android_defaultConfig.versionName
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled rootProject.ext.android_buildTypes_release.minifyEnabled
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    sourceSets {
+        main.jniLibs.srcDirs = ['libs']
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    testCompile 'junit:junit:4.12'
+
+    def rootExtDp = rootProject.ext.dependencies
+    compile rootExtDp.com_tencent_bugly_crashreport
+    compile rootExtDp.com_tencent_bugly_nativecrashreport
+}

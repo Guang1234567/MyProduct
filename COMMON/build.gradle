@@ -1,0 +1,127 @@
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+
+apply plugin: 'com.android.library'
+
+// 构建时间相关信息
+long buildTimeInMillis = System.currentTimeMillis()
+DateFormat df = new SimpleDateFormat("yyyyMMdd");
+df.setTimeZone(TimeZone.getTimeZone("UTC+8"))
+def buildTimeFormatted = df.format(new Date(buildTimeInMillis));
+
+android {
+    compileSdkVersion rootProject.ext.android.compileSdkVersion
+    buildToolsVersion rootProject.ext.android.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.android_defaultConfig.minSdkVersion
+        targetSdkVersion rootProject.ext.android_defaultConfig.targetSdkVersion
+        versionCode rootProject.ext.android_defaultConfig.versionCode
+        versionName rootProject.ext.android_defaultConfig.versionName
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled rootProject.ext.android_buildTypes_release.minifyEnabled
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            buildConfigField("Long", "BUILD_TIME_IN_MILLIS", "${buildTimeInMillis}L")
+            buildConfigField "String", "BUILD_TIME", "\"${buildTimeFormatted}\""
+        }
+        debug {
+            jniDebuggable true
+
+            buildConfigField("Long", "BUILD_TIME_IN_MILLIS", "${buildTimeInMillis}L")
+            buildConfigField "String", "BUILD_TIME", "\"${buildTimeFormatted}\""
+        }
+    }
+
+    productFlavors {
+        dev {
+            buildConfigField("Boolean", "IS_DEV_MODE", "true")
+        }
+        prod {
+            buildConfigField("Boolean", "IS_DEV_MODE", "false")
+        }
+    }
+
+    // 过滤某些"构建变体(variant) = flavors + buildType"
+    variantFilter { variant ->
+        def flavorNames = variant.flavors*.name
+        def buildTypeName = variant.buildType.name
+        // To check for a build type instead, use variant.buildType.name == "buildType"
+        if ((flavorNames.contains("dev") && buildTypeName == "release")
+                || (flavorNames.contains("prod") && buildTypeName == "debug")) {
+            // Gradle ignores any variants that satisfy the conditions above.
+            setIgnore(true)
+        }
+    }
+
+    // If the library configures product flavors, you must specify
+    // a build variant by its full configuration name. The following
+    // sets the "demoDebug" build variant as the default version
+    // of the library that Gradle should publish.
+    defaultPublishConfig "devDebug"
+    // Note that this might increase build times because Gradle must
+    // build multiple AARs, instead of only one.
+    publishNonDefault true
+}
+
+// Creates Gradle dependency configurations to use in the dependencies block.
+configurations {
+    // Initializes placeholders for the demoDebugCompile and fullReleaseCompile
+    // dependency configurations.
+    devDebugCompile {}
+    prodReleaseCompile {}
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    testCompile 'junit:junit:4.12'
+
+    def rootExtDp = rootProject.ext.dependencies
+    compile rootExtDp.com_android_support_annotations // 只用注解部分
+
+    compile rootExtDp.com_google_code_gson
+
+    // auto-value
+    annotationProcessor rootExtDp.com_google_auto_value
+    provided rootExtDp.com_google_auto_value
+    annotationProcessor rootExtDp.com_ryanharter_auto_value_gson
+    provided rootExtDp.com_ryanharter_auto_value_gson
+    annotationProcessor rootExtDp.com_ryanharter_auto_value_parcel
+    compile rootExtDp.com_ryanharter_auto_value_parcel_adapter
+    annotationProcessor rootExtDp.com_gabrielittner_auto_value_cursor
+    compile rootExtDp.com_gabrielittner_auto_value_cursor_annotations
+
+    compile rootExtDp.io_reactivex_rxjava2_rxjava
+    compile rootExtDp.io_reactivex_rxjava2_rxandroid
+
+    compile rootExtDp.com_trello_rxlifecycle2
+
+    compile rootExtDp.com_squareup_okhttp3_okhttp
+    testCompile rootExtDp.com_squareup_okhttp3_mockwebserver
+    compile rootExtDp.com_squareup_retrofit2_retrofit
+    compile rootExtDp.com_squareup_retrofit2_adapter_rxjava2
+    compile rootExtDp.com_squareup_retrofit2_converter_gson
+    //compile rootExtDp.org_ligboy_retrofit2_converter_fastjson_android
+
+    compile rootExtDp.com_tencent_bugly_crashreport
+    compile rootExtDp.com_tencent_bugly_nativecrashreport
+
+    compile rootExtDp.com_tencent_mars_xlog
+
+    devDebugCompile rootExtDp.com_github_markzhai_blockcanary_android;
+    prodReleaseCompile rootExtDp.com_github_markzhai_blockcanary_no_op;
+
+    devDebugCompile rootExtDp.com_squareup_leakcanary_leakcanary_android;
+    prodReleaseCompile rootExtDp.com_squareup_leakcanary_leakcanary_android_no_op;
+    testCompile rootExtDp.com_squareup_leakcanary_leakcanary_android_no_op;
+
+    def rootExtMdp = rootProject.ext.modelDependencies
+    compile project(rootExtMdp.SQLCIPHER)
+}
