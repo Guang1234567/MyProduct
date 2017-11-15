@@ -5,10 +5,10 @@ import com.example.myproduct.app.demo.db.model.pojo.TodoListItem;
 import com.example.myproduct.lib.common.utils.db.SQLiteDatabaseCall;
 import com.example.myproduct.lib.common.utils.db.SQLiteDatabaseManager;
 import com.example.myproduct.lib.common.utils.db.annotation.DatabaseThread;
+import com.example.myproduct.lib.common.utils.log.Log;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import io.reactivex.processors.FlowableProcessor;
 import io.reactivex.processors.PublishProcessor;
@@ -19,6 +19,7 @@ import io.reactivex.processors.PublishProcessor;
  */
 
 public class TodoModel {
+    private static final String TAG = "TodoModel";
 
     private final FlowableProcessor mNotifier;
 
@@ -26,10 +27,15 @@ public class TodoModel {
         mNotifier = PublishProcessor.create().toSerialized();
     }
 
-    public void notifyInsert(Callable<TodoListItem> t) throws Throwable {
+    public void notifyInsert(SQLiteDatabaseManager dbMgr, final long insertedRowId) {
         if (mNotifier.hasSubscribers()
                 && !mNotifier.hasComplete()) {
-            TodoListItem r = t.call();
+            TodoListItem r = null;
+            try {
+                r = findById(dbMgr, insertedRowId);
+            } catch (Throwable tr) {
+                Log.e(TAG, "", tr);
+            }
             if (r != null) {
                 mNotifier.onNext(r);
             }
@@ -52,35 +58,88 @@ public class TodoModel {
     }
 
     @DatabaseThread
-    public long insert(SQLiteDatabaseManager dbMgr, TodoListItem todoListItem) {
+    public TodoListItem findById(SQLiteDatabaseManager dbMgr, long id) {
+        TodoListItem todoListItem;
+        SQLiteDatabaseCall dbCall = dbMgr.obtainDbCall();
+        dbCall.beginTransaction();
+        try {
+            todoListItem = TodoListItemDao.findById(dbCall, id);
+            dbCall.setTransactionSuccessful();
+        } finally {
+            dbCall.endTransaction();
+            dbCall.close();
+        }
+        return todoListItem;
+    }
+
+    @DatabaseThread
+    public long insert(final SQLiteDatabaseManager dbMgr, TodoListItem todoListItem) {
         long insertedRowId = -1L;
         final SQLiteDatabaseCall dbCall = dbMgr.obtainDbCall();
         dbCall.beginTransaction();
         try {
             insertedRowId = TodoListItemDao.insert(dbCall, todoListItem);
-
             dbCall.setTransactionSuccessful();
-
-            // 发通知
-            if (insertedRowId != -1) {
-                // 通知方式一:
-                // Only send a table trigger if the insert was successful.
-                dbMgr.sendTableTrigger(TodoListItem.class); // 在Model层发变化的通知, 别在 Dao 里面发, Dao主要封装数据库操作.
-
-                // 通知方式二:
-                final long finalInsertedRowId = insertedRowId;
-                notifyInsert(new Callable<TodoListItem>() {
-                    @Override
-                    public TodoListItem call() throws Exception {
-                        return TodoListItemDao.findById(dbCall, finalInsertedRowId);
-                    }
-                });
-            }
         } catch (Throwable throwable) {
         } finally {
             dbCall.endTransaction();
             dbCall.close();
         }
+
+        // 发通知
+        if (insertedRowId != -1) {
+            // 通知方式一:
+            // Only send a table trigger if the insert was successful.
+            dbMgr.sendTableTrigger(TodoListItem.class); // 在Model层发变化的通知, 别在 Dao 里面发, Dao主要封装数据库操作.
+
+            // 通知方式二:;
+            notifyInsert(dbMgr, insertedRowId);
+        }
+
         return insertedRowId;
+    }
+
+    @DatabaseThread
+    public int deleteById(SQLiteDatabaseManager dbMgr, long id) {
+        int affectedRows = 0;
+        final SQLiteDatabaseCall dbCall = dbMgr.obtainDbCall();
+        dbCall.beginTransaction();
+        try {
+            affectedRows = TodoListItemDao.deleteById(dbCall, id);
+            dbCall.setTransactionSuccessful();
+        } catch (Throwable throwable) {
+        } finally {
+            dbCall.endTransaction();
+            dbCall.close();
+        }
+
+        // 发通知
+        if (affectedRows > 0) {
+            // Only send a table trigger if the insert was successful.
+            dbMgr.sendTableTrigger(TodoListItem.class); // 在Model层发变化的通知, 别在 Dao 里面发, Dao主要封装数据库操作.
+        }
+        return affectedRows;
+    }
+
+    @DatabaseThread
+    public int deleteAll(SQLiteDatabaseManager dbMgr) {
+        int affectedRows = -1;
+        final SQLiteDatabaseCall dbCall = dbMgr.obtainDbCall();
+        dbCall.beginTransaction();
+        try {
+            affectedRows = TodoListItemDao.deleteAll(dbCall);
+            dbCall.setTransactionSuccessful();
+        } catch (Throwable throwable) {
+        } finally {
+            dbCall.endTransaction();
+            dbCall.close();
+        }
+
+        // 发通知
+        if (affectedRows > 0) {
+            // Only send a table trigger if the insert was successful.
+            dbMgr.sendTableTrigger(TodoListItem.class); // 在Model层发变化的通知, 别在 Dao 里面发, Dao主要封装数据库操作.
+        }
+        return affectedRows;
     }
 }

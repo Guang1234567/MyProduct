@@ -89,4 +89,12 @@ public class TodoItemDao {
         DbUtils.closeQuietly(c);
         return todoItems;
     }
+
+    public static int deleteSomeByListId(SQLiteDatabaseCall dbcall, long id) {
+        return dbcall.delete(TodoItem.TABLE, TodoItem.LIST_ID + "=?", new String[]{String.valueOf(id)});
+    }
+
+    public static int deleteAll(SQLiteDatabaseCall dbcall) {
+        return dbcall.delete(TodoItem.TABLE, null, null);
+    }
 }

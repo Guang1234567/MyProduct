@@ -62,4 +62,12 @@ public class TodoListDao {
         DbUtils.closeQuietly(c);
         return todoLists;
     }
+
+    public static int deleteById(SQLiteDatabaseCall dbcall, long id) {
+        return dbcall.delete(TodoList.TABLE, TodoList.ROW_ID + "=?", new String[]{String.valueOf(id)});
+    }
+
+    public static int deleteAll(SQLiteDatabaseCall dbcall) {
+        return dbcall.delete(TodoList.TABLE, null, null);
+    }
 }

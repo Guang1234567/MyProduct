@@ -127,23 +127,45 @@ public class TodoPresenter {
                 });
     }
 
-    public Completable clearAll() {
+    public Completable deleteAll() {
         return Flowable.fromCallable(
-                new Callable<Long>() {
+                new Callable<Integer>() {
                     @Override
-                    public Long call() throws Exception {
-                        return mTodoModel.insert(mDatabaseManager, todoListItem);
+                    public Integer call() throws Exception {
+                        return mTodoModel.deleteAll(mDatabaseManager);
                     }
                 })
                 .subscribeOn(RxSchedulers.database())
                 .observeOn(mScopeScheduler)
-                .flatMapCompletable(new Function<Long, Completable>() {
+                .flatMapCompletable(new Function<Integer, Completable>() {
                     @Override
-                    public Completable apply(Long insertedRowId) throws Exception {
-                        if (insertedRowId != -1L) {
+                    public Completable apply(Integer affectedRows) throws Exception {
+                        if (affectedRows > 0) {
                             return Completable.complete();
                         } else {
-                            return Completable.error(new IllegalStateException("insert fail!"));
+                            return Completable.error(new IllegalStateException("deleteAll fail! affectedRows = " + affectedRows));
+                        }
+                    }
+                });
+    }
+
+    public Completable deleteById(final long id) {
+        return Flowable.fromCallable(
+                new Callable<Integer>() {
+                    @Override
+                    public Integer call() throws Exception {
+                        return mTodoModel.deleteById(mDatabaseManager, id);
+                    }
+                })
+                .subscribeOn(RxSchedulers.database())
+                .observeOn(mScopeScheduler)
+                .flatMapCompletable(new Function<Integer, Completable>() {
+                    @Override
+                    public Completable apply(Integer affectedRows) throws Exception {
+                        if (affectedRows > 0) {
+                            return Completable.complete();
+                        } else {
+                            return Completable.error(new IllegalStateException("deleteById fail! affectedRows = " + affectedRows));
                         }
                     }
                 });

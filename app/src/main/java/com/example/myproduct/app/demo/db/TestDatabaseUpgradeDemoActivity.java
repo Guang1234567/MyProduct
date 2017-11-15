@@ -124,6 +124,30 @@ public class TestDatabaseUpgradeDemoActivity extends AppBaseActivity {
                                         });
                     }
                 });
+
+        RxView.longClicks(toolBar)
+                .compose(bindUntilEvent(ActivityEvent.DESTROY))
+                .throttleFirst(500, TimeUnit.MILLISECONDS)
+                .subscribe(new Consumer<Object>() {
+                    @Override
+                    public void accept(Object o) throws Exception {
+                        mPresenter.deleteAll()
+                                .compose(TestDatabaseUpgradeDemoActivity.super.<Set<Object>>bindUntilEvent(ActivityEvent.DESTROY))
+                                .subscribe(
+                                        new Action() {
+                                            @Override
+                                            public void run() throws Exception {
+                                                Log.i(TAG, "deleteAll # onSuccess");
+                                            }
+                                        },
+                                        new Consumer<Throwable>() {
+                                            @Override
+                                            public void accept(Throwable t) throws Exception {
+                                                Log.i(TAG, "deleteAll # onFail", t);
+                                            }
+                                        });
+                    }
+                });
     }
 
     private void setUpList(RecyclerView list) {
@@ -167,6 +191,7 @@ public class TestDatabaseUpgradeDemoActivity extends AppBaseActivity {
         // 监听TodoListItem表变化
         mPresenter.createTodoListItemMonitor()
                 .compose(super.<Set<Object>>bindUntilEvent(ActivityEvent.PAUSE)) // onPause() 被回调时, 自动释放相关资源
+                .debounce(1, TimeUnit.SECONDS) // 防止界面狂刷新
                 .flatMapCompletable(new Function<Set<Object>, Completable>() {
                     @Override
                     public Completable apply(Set<Object> sentTables) throws Exception {

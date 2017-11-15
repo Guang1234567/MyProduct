@@ -92,6 +92,18 @@ public class TodoListItemDao {
         return result;
     }
 
+    @DatabaseThread
+    public static int deleteById(SQLiteDatabaseCall dbCall, long id) {
+        TodoItemDao.deleteSomeByListId(dbCall, id);
+        return TodoListDao.deleteById(dbCall, id);
+    }
+
+    @DatabaseThread
+    public static int deleteAll(SQLiteDatabaseCall dbCall) {
+        TodoItemDao.deleteAll(dbCall);
+        return TodoListDao.deleteAll(dbCall);
+    }
+
     /**
      * 查询所有 TodoListItem.
      * <p>
