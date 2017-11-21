@@ -36,7 +36,8 @@ ext.dependenciesVersion = [
 
 ext.modelDependencies = [
         TECENT_IM_SDK: ':TECENT_IM_SDK',
-        SQLCIPHER    : ':SQLCIPHER'
+        SQLCIPHER    : ':SQLCIPHER',
+        WCDB         : ':WCDB'
 ]
 
 ext.dependencies = [

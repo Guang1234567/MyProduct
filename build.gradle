@@ -14,13 +14,13 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.3'
+        classpath 'com.android.tools.build:gradle:2.3.3'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
+        classpath 'com.tencent.bugly:symtabfileuploader:+'
         classpath "com.gradle:build-scan-plugin:1.6"
         classpath 'org.tmatesoft.svnkit:svnkit:+'
-        classpath 'com.tencent.bugly:symtabfileuploader:+'
         classpath 'com.jakewharton.hugo:hugo-plugin:1.2.1'
     }
 }

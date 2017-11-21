@@ -124,4 +124,6 @@ dependencies {
 
     def rootExtMdp = rootProject.ext.modelDependencies
     compile project(rootExtMdp.SQLCIPHER)
+    devDebugCompile project(path: rootExtMdp.WCDB, configuration: 'devDebug')
+    prodReleaseCompile project(path: rootExtMdp.WCDB, configuration: 'prodRelease')
 }

@@ -1,3 +1,7 @@
 [submodule "LIB_THIRD_PARTY/android-database-sqlcipher"]
 	path = LIB_THIRD_PARTY/android-database-sqlcipher
 	url = https://github.com/LiHanGuang/android-database-sqlcipher.git
+
+[submodule "LIB_THIRD_PARTY/wcdb"]
+	path = LIB_THIRD_PARTY/wcdb
+	url = https://github.com/LiHanGuang/wcdb.git
