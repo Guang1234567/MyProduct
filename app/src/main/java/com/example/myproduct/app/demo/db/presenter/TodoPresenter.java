@@ -46,12 +46,21 @@ public class TodoPresenter {
         mContext = context;
         mTodoModel = new TodoModel();
 
-        SQLiteOpenHelper dbHelper = TodoSQLiteOpenHelper2.create(context.getApplicationContext(),
-                "user001.db");
+        // 非加密版本1
+        SQLiteOpenHelper dbHelper1 = TodoSQLiteOpenHelper2.create(context.getApplicationContext(),
+                "user001.db", SQLiteOpenHelper.EncryptedDBType.NO_CIPHER, null);
+        // 加密版本2
+        SQLiteOpenHelper dbHelper2 = TodoSQLiteOpenHelper2.create(context.getApplicationContext(),
+                "user002.db", SQLiteOpenHelper.EncryptedDBType.SQLCIPHER, "Password_1234567");
+        // 加密版本3
+        SQLiteOpenHelper dbHelper3 = TodoSQLiteOpenHelper2.create(context.getApplicationContext(),
+                "user003.db", SQLiteOpenHelper.EncryptedDBType.WCDB_CIPHER, "Password_7654321");
+        // 非加密版本4
+        SQLiteOpenHelper dbHelper4 = TodoSQLiteOpenHelper2.create(context.getApplicationContext(),
+                "user004.db", SQLiteOpenHelper.EncryptedDBType.WCDB_NO_CIPHER, null);
 
         // 用户001 的数据库
-        mDatabaseManager = SQLiteDatabaseManager.createStandard(dbHelper); // 非加密版本
-        //mDatabaseManager = SQLiteDatabaseManager.createEncrypted(dbHelper, "password_1234567"); // 加密版本
+        mDatabaseManager = SQLiteDatabaseManager.create(/*dbHelper1*/ /*dbHelper2*/ dbHelper3);
         mDatabaseHolder = mDatabaseManager.obtainDbCall();
 
 

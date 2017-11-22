@@ -1,7 +1,5 @@
 package com.example.myproduct.lib.common.utils.db;
 
-import android.text.TextUtils;
-
 import com.example.myproduct.lib.common.utils.log.Log;
 
 import java.util.Arrays;
@@ -36,44 +34,28 @@ public class SQLiteDatabaseManager {
 
     private SQLiteDatabaseCall mDatabase;
 
-    private boolean mIsEncrypted;
-    private String mPassword;
-
     private final FlowableProcessor<Set<Object>> mTriggers;
 
     private SQLiteDatabaseManager(SQLiteOpenHelper helper) {
-        this(helper, null);
-    }
-
-    private SQLiteDatabaseManager(SQLiteOpenHelper helper, String password) {
         mOpenCounter = new AtomicInteger();
         mDatabaseHelper = helper;
         mName = helper.getDatabaseName();
 
-        mIsEncrypted = !TextUtils.isEmpty(password);
-        mPassword = password;
-
         mTriggers = PublishProcessor.<Set<Object>>create().toSerialized();
     }
 
-    public static SQLiteDatabaseManager createStandard(SQLiteOpenHelper helper) {
+    public static SQLiteDatabaseManager create(SQLiteOpenHelper helper) {
         return new SQLiteDatabaseManager(helper);
-    }
-
-    public static SQLiteDatabaseManager createEncrypted(SQLiteOpenHelper helper, String password) {
-        return new SQLiteDatabaseManager(helper, password);
     }
 
     final /*public*/ synchronized SQLiteDatabaseCall openDatabase() {
         if (mOpenCounter.incrementAndGet() == 1) {
             // Opening new database
-            if (mIsEncrypted) {
-                mDatabase = mDatabaseHelper.getEncryptedWritableDb(mPassword);
-            } else {
-                mDatabase = mDatabaseHelper.getWritableDb();
-            }
+            mDatabase = mDatabaseHelper.getWritableDb();
         } else {
-            Log.w(TAG, "\nRecommend read or write database in single thread!\nCurrent reference count : " + mOpenCounter.get() + "\nCurrent Thread : " + String.valueOf(Thread.currentThread()));
+            Log.w(TAG, "\nRecommend read or write database in single thread!\nCurrent reference count : " + mOpenCounter.get()
+                            + "\nCurrent Thread : " + String.valueOf(Thread.currentThread()),
+                    new Exception());
         }
         return mDatabase;
     }
@@ -118,7 +100,6 @@ public class SQLiteDatabaseManager {
         sb.append(", mDatabaseHelper=").append(mDatabaseHelper);
         sb.append(", mName='").append(mName).append('\'');
         sb.append(", mDatabase=").append(mDatabase);
-        sb.append(", mIsEncrypted=").append(mIsEncrypted);
         sb.append(", mTriggers=").append(mTriggers);
         sb.append('}');
         return sb.toString();

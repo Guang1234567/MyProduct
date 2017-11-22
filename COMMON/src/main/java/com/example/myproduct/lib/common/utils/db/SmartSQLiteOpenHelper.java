@@ -11,8 +11,9 @@ public abstract class SmartSQLiteOpenHelper extends SQLiteOpenHelper {
     private SQLiteUpgrader mSQLiteUpgrader;
 
     public SmartSQLiteOpenHelper(Context context, String name, int version,
+                                 EncryptedDBType encryptedDBType, String password,
                                  SQLiteUpgrader sqLiteUpgrader) {
-        super(context, name, version);
+        super(context, name, version, encryptedDBType, password);
         init(sqLiteUpgrader);
     }
 

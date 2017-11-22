@@ -7,7 +7,6 @@ import android.database.SQLException;
 import java.io.Closeable;
 
 /**
- * 一个拦截所有数据库异常, 并把异常转化为错误码返回的数据库操作封装类.
  *
  * @author lihanguang
  * @date 2017/9/12 16:48

@@ -17,13 +17,16 @@ public class TodoSQLiteOpenHelper2 extends SmartSQLiteOpenHelper {
     public static final int DATABASE_FIRST_VERSION = 1; // 最初版本号是 1
     public static final int DATABASE_LAST_VERSION = 3; // 目前是 3
 
-    private TodoSQLiteOpenHelper2(Context context, String name, int version, SQLiteUpgrader upgrader) {
-        super(context, name, version, upgrader);
+    private TodoSQLiteOpenHelper2(Context context, String name, int version,
+                                  EncryptedDBType encryptedDBType, String password,
+                                  SQLiteUpgrader upgrader) {
+        super(context, name, version, encryptedDBType, password, upgrader);
     }
 
-    public static TodoSQLiteOpenHelper2 create(Context context, String name) {
+    public static TodoSQLiteOpenHelper2 create(Context context, String name,
+                                               EncryptedDBType encryptedDBType, String password) {
         SQLiteUpgrader upgrader = new SQLiteUpgraderImpl(DATABASE_FIRST_VERSION, DATABASE_LAST_VERSION);
-        return new TodoSQLiteOpenHelper2(context, name, DATABASE_LAST_VERSION, upgrader);
+        return new TodoSQLiteOpenHelper2(context, name, DATABASE_LAST_VERSION, encryptedDBType, password, upgrader);
     }
 
     @Override
