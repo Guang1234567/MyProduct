@@ -30,15 +30,6 @@ public class TestDatabaseListAdapter extends BaseRecyclerViewAdapter {
     }
 
     @Override
-    public long getItemId(int position) {
-        Object itemData = getItem(position);
-        if (itemData instanceof TodoListItem) {
-            return ((TodoListItem) itemData).todoList().rowId();
-        }
-        return super.getItemId(position);
-    }
-
-    @Override
     public int getItemCount() {
         return mItemDatas == null ? 0 : mItemDatas.size();
     }
@@ -48,37 +39,13 @@ public class TestDatabaseListAdapter extends BaseRecyclerViewAdapter {
         return mItemDatas == null ? null : mItemDatas.get(position);
     }
 
-    public Completable changeAll(List<? extends Object> newData) {
-        if (newData == null) {
-            newData = new LinkedList<>();
+    @Override
+    public long getItemId(int position) {
+        Object itemData = getItem(position);
+        if (itemData instanceof TodoListItem) {
+            return ((TodoListItem) itemData).todoList().rowId();
         }
-
-        final List<? extends Object> finalNewData = newData;
-        Collections.sort(finalNewData, new InnerComparator());
-        return Completable.fromCallable(
-                new Callable<List<? extends Object>>() {
-                    @Override
-                    public List<? extends Object> call() throws Exception {
-                        mItemDatas = finalNewData;
-                        notifyDataSetChanged();
-                        return mItemDatas;
-                    }
-                })
-                .subscribeOn(RxSchedulers.mainThread())
-                .observeOn(RxSchedulers.workerThread());
-    }
-
-    private static class InnerComparator implements Comparator<Object> {
-        @Override
-        public int compare(Object o1, Object o2) {
-            if (o1 instanceof TodoListItem && o2 instanceof TodoListItem) {
-                return Long.compare(
-                        Math.max(((TodoListItem) o2).itemCount(), ((TodoListItem) o2).todoItems().size()),
-                        Math.max(((TodoListItem) o1).itemCount(), ((TodoListItem) o1).todoItems().size())
-                );
-            }
-            return 0;
-        }
+        return super.getItemId(position);
     }
 
     @Override
@@ -88,17 +55,6 @@ public class TestDatabaseListAdapter extends BaseRecyclerViewAdapter {
             return 11;
         } else {
             return 99;
-        }
-    }
-
-    @Override
-    public BaseViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        switch (viewType) {
-            case 11:
-                return TodoListItemViewHolder.create(parent);
-            case 99:
-            default:
-                return ObjectItemViewHolder.create(parent);
         }
     }
 
@@ -163,6 +119,50 @@ public class TestDatabaseListAdapter extends BaseRecyclerViewAdapter {
         @Override
         protected void onBindViewHolder(Object item, int position, List<Object> payloads, TestDatabaseListAdapter outerAdapter) {
             super.onBindViewHolder(item, position, payloads, outerAdapter);
+        }
+    }
+
+    @Override
+    public BaseViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        switch (viewType) {
+            case 11:
+                return TodoListItemViewHolder.create(parent);
+            case 99:
+            default:
+                return ObjectItemViewHolder.create(parent);
+        }
+    }
+
+    public Completable changeAll(List<? extends Object> newData) {
+        if (newData == null) {
+            newData = new LinkedList<>();
+        }
+
+        final List<? extends Object> finalNewData = newData;
+        Collections.sort(finalNewData, new InnerComparator());
+        return Completable.fromCallable(
+                new Callable<List<? extends Object>>() {
+                    @Override
+                    public List<? extends Object> call() throws Exception {
+                        mItemDatas = finalNewData;
+                        notifyDataSetChanged();
+                        return mItemDatas;
+                    }
+                })
+                .subscribeOn(RxSchedulers.mainThread())
+                .observeOn(RxSchedulers.workerThread());
+    }
+
+    private static class InnerComparator implements Comparator<Object> {
+        @Override
+        public int compare(Object o1, Object o2) {
+            if (o1 instanceof TodoListItem && o2 instanceof TodoListItem) {
+                return Long.compare(
+                        Math.max(((TodoListItem) o2).itemCount(), ((TodoListItem) o2).todoItems().size()),
+                        Math.max(((TodoListItem) o1).itemCount(), ((TodoListItem) o1).todoItems().size())
+                );
+            }
+            return 0;
         }
     }
 }

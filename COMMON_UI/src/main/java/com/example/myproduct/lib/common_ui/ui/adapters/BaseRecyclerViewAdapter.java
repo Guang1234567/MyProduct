@@ -216,9 +216,8 @@ public abstract class BaseRecyclerViewAdapter extends RecyclerView.Adapter<BaseR
         holder.onBindViewHolder(item, position, this);
     }
 
-    final
     @Override
-    public void onBindViewHolder(BaseViewHolder holder, int position, List<Object> payloads) {
+    final public void onBindViewHolder(BaseViewHolder holder, int position, List<Object> payloads) {
         if (payloads == null || payloads.isEmpty()) {
             super.onBindViewHolder(holder, position, payloads);
         } else {
